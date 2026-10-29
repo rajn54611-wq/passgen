@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Password Generator + Strength Checker"""
+import argparse
 import math
 import re
 import secrets
@@ -90,5 +91,31 @@ def main():
             print("Invalid choice")
 
 
+def cli():
+    p = argparse.ArgumentParser(description="Password generator and strength checker")
+    p.add_argument("-l", "--length", type=int, default=16, help="password length (8-128)")
+    p.add_argument("-c", "--count", type=int, default=1, help="how many passwords")
+    p.add_argument("--no-symbols", action="store_true", help="exclude symbols")
+    p.add_argument("--no-digits", action="store_true", help="exclude digits")
+    p.add_argument("--no-upper", action="store_true", help="exclude uppercase")
+    p.add_argument("-k", "--check", metavar="PASSWORD", help="check a password's strength")
+    a = p.parse_args()
+
+    if a.check:
+        label, bits, tips = check_strength(a.check)
+        print(f"Strength: {label} ({bits} bits)")
+        for t in tips:
+            print(f" - {t}")
+        return
+    n = max(8, min(a.length, 128))
+    for _ in range(max(1, a.count)):
+        pw = generate(n, not a.no_upper, not a.no_digits, not a.no_symbols)
+        print(pw)
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) > 1:
+        cli()
+    else:
+        main()
